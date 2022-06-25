@@ -8,8 +8,8 @@ use image::{
 fn main() -> Result<(), ImageDataErrors> {
     let args = Args::new();
     println!("{:?}", args);
-    let (image_1, image_1_format) = find_image_path(args.image_1);
-    let (image_2, image_2_format) = find_image_path(args.image_2);
+    let (image_1, image_1_format) = find_image_from_path(args.image_1);
+    let (image_2, image_2_format) = find_image_from_path(args.image_2);
 
     if image_1_format != image_2_format {
         return Err(ImageDataErrors::DifferentImageFormats);
@@ -32,8 +32,8 @@ fn main() -> Result<(), ImageDataErrors> {
     image::save_buffer_with_format(
         output.name,
         &output.data,
-        output.w,
-        output.h,
+        output.width,
+        output.height,
         image::ColorType::Rgba8,
         image_1_format,
     )
@@ -42,7 +42,7 @@ fn main() -> Result<(), ImageDataErrors> {
     Ok(())
 }
 
-fn find_image_path(path: String) -> (DynamicImage, ImageFormat) {
+fn find_image_from_path(path: String) -> (DynamicImage, ImageFormat) {
     let image_reader = Reader::open(path).unwrap();
     let image_format = image_reader.format().unwrap();
     let image = image_reader.decode().unwrap();
@@ -55,30 +55,30 @@ fn get_smallest_dimensions(dim_1: (u32, u32), dim_2: (u32, u32)) -> (u32, u32) {
     return if pix_1 < pix_2 { dim_1 } else { dim_2 };
 }
 fn standardise_size(image_1: DynamicImage, image_2: DynamicImage) -> (DynamicImage, DynamicImage) {
-    let (w, h) = get_smallest_dimensions(image_1.dimensions(), image_2.dimensions());
+    let (width, height) = get_smallest_dimensions(image_1.dimensions(), image_2.dimensions());
 
-    if image_2.dimensions() == (w, h) {
-        (image_1.resize_exact(w, h, Triangle), image_2)
+    if image_2.dimensions() == (width, height) {
+        (image_1.resize_exact(width, height, Triangle), image_2)
     } else {
-        (image_1, image_2.resize_exact(w, h, Triangle))
+        (image_1, image_2.resize_exact(width, height, Triangle))
     }
 }
 
 #[derive(Debug)]
 struct FloatingImage {
-    w: u32,
-    h: u32,
+    width: u32,
+    height: u32,
     data: Vec<u8>,
     name: String,
 }
 
 impl FloatingImage {
-    fn new(w: u32, h: u32, name: String) -> Self {
+    fn new(width: u32, height: u32, name: String) -> Self {
         let buffer_cap = 3_655_744;
         let buffer = Vec::with_capacity(buffer_cap);
         FloatingImage {
-            w: w,
-            h: h,
+            width,
+            height,
             data: buffer,
             name: name,
         }
