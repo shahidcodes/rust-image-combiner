@@ -74,21 +74,19 @@ struct FloatingImage {
 
 impl FloatingImage {
     fn new(width: u32, height: u32, name: String) -> Self {
-        let buffer_cap = 3_655_744;
-        let buffer = Vec::with_capacity(buffer_cap);
+        let buffer_capacity = 3_655_744;
+        let buffer: Vec<u8> = Vec::with_capacity(buffer_capacity);
         FloatingImage {
             width,
             height,
             data: buffer,
-            name: name,
+            name,
         }
     }
-
     fn set_data(&mut self, data: Vec<u8>) -> Result<(), ImageDataErrors> {
         if data.len() > self.data.capacity() {
             return Err(ImageDataErrors::BufferTooSmall);
         }
-
         self.data = data;
         Ok(())
     }
@@ -101,8 +99,9 @@ enum ImageDataErrors {
 }
 
 fn combine_images(image_1: DynamicImage, image_2: DynamicImage) -> Vec<u8> {
-    let vec_1 = image_1.to_rgb8().into_vec();
-    let vec_2 = image_2.to_rgb8().into_vec();
+    let vec_1 = image_1.to_rgba8().into_vec();
+    let vec_2 = image_2.to_rgba8().into_vec();
+
     alternate_pixels(vec_1, vec_2)
 }
 
